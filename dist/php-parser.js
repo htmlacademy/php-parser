@@ -1,4 +1,4 @@
-/*! php-parser - BSD3 License - 2017-12-28 */
+/*! php-parser - BSD3 License - 2019-08-13 */
 
 require=(function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(require,module,exports){
 /*!
@@ -194,6 +194,10 @@ process.off = noop;
 process.removeListener = noop;
 process.removeAllListeners = noop;
 process.emit = noop;
+process.prependListener = noop;
+process.prependOnceListener = noop;
+
+process.listeners = function (name) { return [] }
 
 process.binding = function (name) {
     throw new Error('process.binding is not supported');
@@ -489,1376 +493,104 @@ AST.prototype.prepare = function(kind, parser) {
 
 // Define all AST nodes
 [
-  require('./ast/array'),
-  require('./ast/assign'),
-  require('./ast/bin'),
-  require('./ast/block'),
-  require('./ast/boolean'),
-  require('./ast/break'),
-  require('./ast/call'),
-  require('./ast/case'),
-  require('./ast/cast'),
-  require('./ast/catch'),
-  require('./ast/class'),
-  require('./ast/classconstant'),
-  require('./ast/clone'),
-  require('./ast/closure'),
-  require('./ast/constant'),
-  require('./ast/constref'),
-  require('./ast/continue'),
-  require('./ast/declaration'),
-  require('./ast/declare'),
-  require('./ast/do'),
-  require('./ast/doc'),
-  require('./ast/echo'),
-  require('./ast/empty'),
-  require('./ast/encapsed'),
-  require('./ast/entry'),
-  require('./ast/error'),
-  require('./ast/eval'),
-  require('./ast/exit'),
-  require('./ast/expression'),
-  require('./ast/for'),
-  require('./ast/foreach'),
-  require('./ast/function'),
-  require('./ast/global'),
-  require('./ast/goto'),
-  require('./ast/halt'),
-  require('./ast/identifier'),
-  require('./ast/if'),
-  require('./ast/include'),
-  require('./ast/inline'),
-  require('./ast/interface'),
-  require('./ast/isset'),
-  require('./ast/label'),
-  require('./ast/list'),
-  require('./ast/literal'),
-  require('./ast/lookup'),
-  require('./ast/magic'),
-  require('./ast/method'),
-  require('./ast/namespace'),
-  require('./ast/new'),
-  require('./ast/node'),
-  require('./ast/nowdoc'),
-  require('./ast/number'),
-  require('./ast/offsetlookup'),
-  require('./ast/operation'),
-  require('./ast/parameter'),
-  require('./ast/parenthesis'),
-  require('./ast/post'),
-  require('./ast/pre'),
-  require('./ast/print'),
-  require('./ast/program'),
-  require('./ast/property'),
-  require('./ast/propertylookup'),
-  require('./ast/retif'),
-  require('./ast/return'),
-  require('./ast/silent'),
-  require('./ast/statement'),
-  require('./ast/static'),
-  require('./ast/staticlookup'),
-  require('./ast/string'),
-  require('./ast/switch'),
-  require('./ast/sys'),
-  require('./ast/throw'),
-  require('./ast/trait'),
-  require('./ast/traitalias'),
-  require('./ast/traitprecedence'),
-  require('./ast/traituse'),
-  require('./ast/try'),
-  require('./ast/unary'),
-  require('./ast/unset'),
-  require('./ast/usegroup'),
-  require('./ast/useitem'),
-  require('./ast/variable'),
-  require('./ast/variadic'),
-  require('./ast/while'),
-  require('./ast/yield'),
-  require('./ast/yieldfrom')
-].forEach(function (ctor) {
-  var kind = ctor.prototype.constructor.name.toLowerCase();
-  if (kind[0] === '_') kind = kind.substring(1);
+  'array',
+  'assign',
+  'bin',
+  'block',
+  'boolean',
+  'break',
+  'call',
+  'case',
+  'cast',
+  'catch',
+  'class',
+  'classconstant',
+  'clone',
+  'closure',
+  'constant',
+  'constref',
+  'continue',
+  'declaration',
+  'declare',
+  'do',
+  'doc',
+  'echo',
+  'empty',
+  'encapsed',
+  'entry',
+  'error',
+  'eval',
+  'exit',
+  'expression',
+  'for',
+  'foreach',
+  'function',
+  'global',
+  'goto',
+  'halt',
+  'identifier',
+  'if',
+  'include',
+  'inline',
+  'interface',
+  'isset',
+  'label',
+  'list',
+  'literal',
+  'lookup',
+  'magic',
+  'method',
+  'namespace',
+  'new',
+  'node',
+  'nowdoc',
+  'number',
+  'offsetlookup',
+  'operation',
+  'parameter',
+  'parenthesis',
+  'post',
+  'pre',
+  'print',
+  'program',
+  'property',
+  'propertylookup',
+  'retif',
+  'return',
+  'silent',
+  'statement',
+  'static',
+  'staticlookup',
+  'string',
+  'switch',
+  'sys',
+  'throw',
+  'trait',
+  'traitalias',
+  'traitprecedence',
+  'traituse',
+  'try',
+  'unary',
+  'unset',
+  'usegroup',
+  'useitem',
+  'variable',
+  'variadic',
+  'while',
+  'yield',
+  'yieldfrom'
+].forEach(function (name) {
+  var ctor = require('./ast/' + name);
+  var kind = name.toLowerCase();
+  if (kind[0] === '_') {
+    kind = kind.substring(1);
+  }
   AST.prototype[kind] = ctor;
 });
 
 module.exports = AST;
 
-},{"./ast/array":4,"./ast/assign":5,"./ast/bin":6,"./ast/block":7,"./ast/boolean":8,"./ast/break":9,"./ast/call":10,"./ast/case":11,"./ast/cast":12,"./ast/catch":13,"./ast/class":14,"./ast/classconstant":15,"./ast/clone":16,"./ast/closure":17,"./ast/constant":18,"./ast/constref":19,"./ast/continue":20,"./ast/declaration":21,"./ast/declare":22,"./ast/do":23,"./ast/doc":24,"./ast/echo":25,"./ast/empty":26,"./ast/encapsed":27,"./ast/entry":28,"./ast/error":29,"./ast/eval":30,"./ast/exit":31,"./ast/expression":32,"./ast/for":33,"./ast/foreach":34,"./ast/function":35,"./ast/global":36,"./ast/goto":37,"./ast/halt":38,"./ast/identifier":39,"./ast/if":40,"./ast/include":41,"./ast/inline":42,"./ast/interface":43,"./ast/isset":44,"./ast/label":45,"./ast/list":46,"./ast/literal":47,"./ast/location":48,"./ast/lookup":49,"./ast/magic":50,"./ast/method":51,"./ast/namespace":52,"./ast/new":53,"./ast/node":54,"./ast/nowdoc":55,"./ast/number":56,"./ast/offsetlookup":57,"./ast/operation":58,"./ast/parameter":59,"./ast/parenthesis":60,"./ast/position":61,"./ast/post":62,"./ast/pre":63,"./ast/print":64,"./ast/program":65,"./ast/property":66,"./ast/propertylookup":67,"./ast/retif":68,"./ast/return":69,"./ast/silent":70,"./ast/statement":71,"./ast/static":72,"./ast/staticlookup":73,"./ast/string":74,"./ast/switch":75,"./ast/sys":76,"./ast/throw":77,"./ast/trait":78,"./ast/traitalias":79,"./ast/traitprecedence":80,"./ast/traituse":81,"./ast/try":82,"./ast/unary":83,"./ast/unset":84,"./ast/usegroup":85,"./ast/useitem":86,"./ast/variable":87,"./ast/variadic":88,"./ast/while":89,"./ast/yield":90,"./ast/yieldfrom":91}],4:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Expr = require('./expression');
-var KIND = 'array';
-
-/**
- * Defines an array structure
- * @constructor Array
- * @example
- * // PHP code :
- * [1, 'foo' => 'bar', 3]
- *
- * // AST structure :
- * {
- *  "kind": "array",
- *  "shortForm": true
- *  "items": [{
- *    "kind": "entry",
- *    "key": null,
- *    "value": {"kind": "number", "value": "1"}
- *  }, {
- *    "kind": "entry",
- *    "key": {"kind": "string", "value": "foo", "isDoubleQuote": false},
- *    "value": {"kind": "string", "value": "bar", "isDoubleQuote": false}
- *  }, {
- *    "kind": "entry",
- *    "key": null,
- *    "value": {"kind": "number", "value": "3"}
- *  }]
- * }
- * @extends {Expression}
- * @property {Entry[]} items List of array items
- * @property {boolean} shortForm Indicate if the short array syntax is used, ex `[]` instead `array()`
- */
-var Array = Expr.extends(function Array(shortForm, items, location) {
-  Expr.apply(this, [KIND, location]);
-  this.items = items;
-  this.shortForm = shortForm;
-});
-
-module.exports = Array;
-
-},{"./expression":32}],5:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Statement = require('./statement');
-var KIND = 'assign';
-
-/**
- * Assigns a value to the specified target
- * @constructor Assign
- * @extends {Statement}
- * @property {Expression} left
- * @property {Expression} right
- * @property {String} operator
- */
-var Assign = Statement.extends(function Assign(left, right, operator, location) {
-  Statement.apply(this, [KIND, location]);
-  this.operator = operator;
-  this.left = left;
-  this.right = right;
-});
-
-module.exports = Assign;
-
-},{"./statement":71}],6:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-
-var Operation = require('./operation');
-var KIND = 'bin';
-/**
- * Binary operations
- * @constructor Bin
- * @extends {Operation}
- * @property {String} type
- * @property {Expression} left
- * @property {Expression} right
- */
-var Bin = Operation.extends(function Bin(type, left, right, location) {
-  Operation.apply(this, [KIND, location]);
-  this.type = type;
-  this.left = left;
-  this.right = right;
-});
-
-module.exports = Bin;
-
-},{"./operation":58}],7:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Statement = require('./statement');
-var KIND = 'block';
-
-/**
- * A block statement, i.e., a sequence of statements surrounded by braces.
- * @constructor Block
- * @extends {Statement}
- * @property {Node[]} children
- */
-var Block = Statement.extends(function Block(kind, children, location) {
-  Statement.apply(this, [kind || KIND, location]);
-  this.children = children.filter(Boolean);
-});
-
-module.exports = Block;
-
-},{"./statement":71}],8:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Literal = require('./literal');
-var KIND = 'boolean';
-
-/**
- * Defines a boolean value (true/false)
- * @constructor Boolean
- * @extends {Literal}
- */
-var Boolean = Literal.extends(function Boolean(value, location) {
-  Literal.apply(this, [KIND, value, location]);
-});
-
-module.exports = Boolean;
-
-},{"./literal":47}],9:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-var Node = require('./node');
-var KIND = 'break';
-
-/**
- * A break statement
- * @constructor Break
- * @extends {Node}
- * @property {Number|Null} level
- */
-var Break = Node.extends(function Break(level, location) {
-  Node.apply(this, [KIND, location]);
-  this.level = level;
-});
-
-module.exports = Break;
-
-},{"./node":54}],10:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-
-var Statement = require('./statement');
-var KIND = 'call';
-
-/**
- * Executes a call statement
- * @constructor Call
- * @extends {Statement}
- * @property {Identifier|Variable|??} what
- * @property {Arguments[]} arguments
- */
-var Call = Statement.extends(function Call(what, args, location) {
-  Statement.apply(this, [KIND, location]);
-  this.what = what;
-  this.arguments = args;
-});
-
-module.exports = Call;
-
-},{"./statement":71}],11:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-var Node = require('./node');
-var KIND = 'case';
-
-/**
- * A switch case statement
- * @constructor Case
- * @extends {Node}
- * @property {Expression|null} test - if null, means that the default case
- * @property {Block|null} body
- */
-var Case = Node.extends(function Case(test, body, location) {
-  Node.apply(this, [KIND, location]);
-  this.test = test;
-  this.body = body;
-});
-
-module.exports = Case;
-
-},{"./node":54}],12:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-
-var Operation = require('./operation');
-var KIND = 'cast';
-
-/**
- * Binary operations
- * @constructor Cast
- * @extends {Operation}
- * @property {String} type
- * @property {Expression} what
- */
-var Cast = Operation.extends(function Cast(type, what, location) {
-  Operation.apply(this, [KIND, location]);
-  this.type = type;
-  this.what = what;
-});
-
-module.exports = Cast;
-
-},{"./operation":58}],13:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-
-var Statement = require('./statement');
-var KIND = 'catch';
-
-/**
- * Defines a catch statement
- * @constructor Catch
- * @extends {Statement}
- * @property {Identifier[]} what
- * @property {Variable} variable
- * @property {Statement} body
- * @see http://php.net/manual/en/language.exceptions.php
- */
-var Catch = Statement.extends(function Catch(body, what, variable, location) {
-  Statement.apply(this, [KIND, location]);
-  this.body = body;
-  this.what = what;
-  this.variable = variable;
-});
-
-module.exports = Catch;
-
-},{"./statement":71}],14:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Declaration = require('./declaration');
-var KIND = 'class';
-
-
-/**
- * A class definition
- * @constructor Class
- * @extends {Declaration}
- * @property {Identifier|null} extends
- * @property {Identifier[]} implements
- * @property {Declaration[]} body
- * @property {boolean} isAnonymous
- * @property {boolean} isAbstract
- * @property {boolean} isFinal
- */
-var Class = Declaration.extends(function Class(name, ext, impl, body, flags, location) {
-  Declaration.apply(this, [KIND, name, location]);
-  this.isAnonymous = name ? false : true;
-  this.extends = ext;
-  this.implements = impl;
-  this.body = body;
-  this.parseFlags(flags);
-});
-
-module.exports = Class;
-
-},{"./declaration":21}],15:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Constant = require('./constant');
-var KIND = 'classconstant';
-
-/**
- * Defines a class/interface/trait constant
- * @constructor ClassConstant
- * @extends {Constant}
- * @property {boolean} isStatic
- * @property {string} visibility
- */
-var ClassConstant = Constant.extends(function ClassConstant(name, value, flags, location) {
-  Constant.apply(this, [name, value, location]);
-  this.kind = KIND;
-  this.parseFlags(flags);
-});
-
-module.exports = ClassConstant;
-
-},{"./constant":18}],16:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Statement = require('./statement');
-var KIND = 'clone';
-
-/**
- * Defines a clone call
- * @constructor Clone
- * @extends {Statement}
- * @property {Expression} what
- */
-var Clone = Statement.extends(function Clone(what, location) {
-  Statement.apply(this, [KIND, location]);
-  this.what = what;
-});
-
-module.exports = Clone;
-
-},{"./statement":71}],17:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-var Statement = require('./statement');
-var KIND = 'closure';
-
-/**
- * Defines a closure
- * @constructor Closure
- * @extends {Statement}
- * @property {Parameter[]} arguments
- * @property {Variable[]} uses
- * @property {Identifier} type
- * @property {boolean} byref
- * @property {boolean} nullable
- * @property {Block|null} body
- * @property {boolean} isStatic
- */
-var Closure = Statement.extends(function Closure(args, byref, uses, type, nullable, isStatic, location) {
-  Statement.apply(this, [KIND, location]);
-  this.uses = uses;
-  this.arguments = args;
-  this.byref = byref;
-  this.type = type;
-  this.nullable = nullable;
-  this.isStatic = isStatic || false;
-  this.body = null;
-});
-
-module.exports = Closure;
-
-},{"./statement":71}],18:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Declaration = require('./declaration');
-var KIND = 'constant';
-
-/**
- * Defines a namespace constant
- * @constructor Constant
- * @extends {Declaration}
- * @property {Node|null} value
- */
-var Constant = Declaration.extends(function Constant(name, value, location) {
-  Declaration.apply(this, [KIND, name, location]);
-  this.value = value;
-});
-
-module.exports = Constant;
-
-},{"./declaration":21}],19:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Expr = require('./expression');
-var KIND = 'constref';
-
-/**
- * A constant reference
- * @constructor ConstRef
- * @extends {Expression}
- * @property {String|Node} name
- */
-var ConstRef = Expr.extends(function ConstRef(identifier, location) {
-  Expr.apply(this, [KIND, location]);
-  this.name = identifier;
-});
-
-module.exports = ConstRef;
-
-},{"./expression":32}],20:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-var Node = require('./node');
-var KIND = 'continue';
-
-/**
- * A continue statement
- * @constructor Continue
- * @extends {Node}
- * @property {Number|Null} level
- */
-var Continue = Node.extends(function Continue(level, location) {
-  Node.apply(this, [KIND, location]);
-  this.level = level;
-});
-
-module.exports = Continue;
-
-},{"./node":54}],21:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Statement = require('./statement');
-var KIND = 'declaration';
-
-var IS_PUBLIC     = 'public';
-var IS_PROTECTED  = 'protected';
-var IS_PRIVATE    = 'private';
-
-/**
- * A declaration statement (function, class, interface...)
- * @constructor Declaration
- * @extends {Statement}
- * @property {string} name
- */
-var Declaration = Statement.extends(function Declaration(kind, name, location) {
-  Statement.apply(this, [kind || KIND, location]);
-  this.name = name;
-});
-
-/**
- * Generic flags parser
- * @param {Integer[]} flags
- * @return {void}
- */
-Declaration.prototype.parseFlags = function(flags) {
-  this.isAbstract = flags[2] === 1;
-  this.isFinal = flags[2] === 2;
-  if (this.kind !== 'class') {
-    if (flags[0] === 0) {
-      this.visibility = IS_PUBLIC;
-    } else if (flags[0] === 1) {
-      this.visibility = IS_PROTECTED;
-    } else if (flags[0] === 2) {
-      this.visibility = IS_PRIVATE;
-    }
-    this.isStatic = flags[1] === 1;
-  }
-};
-
-module.exports = Declaration;
-
-},{"./statement":71}],22:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Block = require('./block');
-var KIND = 'declare';
-
-/**
- * The declare construct is used to set execution directives for a block of code
- * @constructor Declare
- * @extends {Block}
- * @property {Expression[]} what
- * @property {String} mode
- * @see http://php.net/manual/en/control-structures.declare.php
- */
-var Declare = Block.extends(function Declare(what, body, mode, location) {
-  Block.apply(this, [KIND, body, location]);
-  this.what = what;
-  this.mode = mode;
-});
-
-
-/**
- * The node is declared as a short tag syntax :
- * ```php
- * <?php
- * declare(ticks=1):
- * // some statements
- * enddeclare;
- * ```
- * @constant {String} MODE_SHORT
- */
-Declare.MODE_SHORT = 'short';
-
-/**
- * The node is declared bracket enclosed code :
- * ```php
- * <?php
- * declare(ticks=1) {
- * // some statements
- * }
- * ```
- * @constant {String} MODE_BLOCK
- */
-Declare.MODE_BLOCK = 'block';
-
-/**
- * The node is declared as a simple statement. In order to make things simpler
- * children of the node are automatically collected until the next
- * declare statement.
- * ```php
- * <?php
- * declare(ticks=1);
- * // some statements
- * declare(ticks=2);
- * // some statements
- * ```
- * @constant {String} MODE_NONE
- */
-Declare.MODE_NONE = 'none';
-
-module.exports = Declare;
-
-},{"./block":7}],23:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-
-var Statement = require('./statement');
-var KIND = 'do';
-
-/**
- * Defines a do/while statement
- * @constructor Do
- * @extends {Statement}
- * @property {Expression} test
- * @property {Statement} body
- */
-var Do = Statement.extends(function Do(test, body, location) {
-  Statement.apply(this, [KIND, location]);
-  this.test = test;
-  this.body = body;
-});
-
-module.exports = Do;
-
-},{"./statement":71}],24:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Node = require('./node');
-var KIND = 'doc';
-
-/**
- * A comment or documentation
- * @constructor Documentation
- * @extends {Node}
- * @property {Boolean} isDoc
- * @property {String[]} lines
- */
-var Doc = Node.extends(function Doc(isDoc, lines, location) {
-  Node.apply(this, [KIND, location]);
-  this.isDoc = isDoc;
-  this.lines = lines;
-});
-
-module.exports = Doc;
-
-},{"./node":54}],25:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Sys = require('./sys');
-var KIND = 'echo';
-
-/**
- * Defines system based call
- * @constructor Echo
- * @extends {Sys}
- */
-var Echo = Sys.extends(function Echo(args, location) {
-  Sys.apply(this, [KIND, args, location]);
-});
-
-module.exports = Echo;
-
-},{"./sys":76}],26:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Sys = require('./sys');
-var KIND = 'empty';
-
-/**
- * Defines an empty check call
- * @constructor Empty
- * @extends {Sys}
- */
-var Empty = Sys.extends(function Empty(args, location) {
-  Sys.apply(this, [KIND, args, location]);
-});
-
-module.exports = Empty;
-
-},{"./sys":76}],27:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Literal = require('./literal');
-var KIND = 'encapsed';
-
-/**
- * Defines an encapsed string (contains expressions)
- * @constructor Encapsed
- * @extends {Literal}
- * @property {String} type - Defines the type of encapsed string (shell, heredoc, string)
- * @property {String|Null} label - The heredoc label, defined only when the type is heredoc
- */
-var Encapsed = Literal.extends(function Encapsed(value, type, location) {
-  Literal.apply(this, [KIND, value, location]);
-  this.type = type;
-});
-
-
-/**
- * The node is a double quote string :
- * ```php
- * <?php
- * echo "hello $world";
- * ```
- * @constant {String} TYPE_STRING - `string`
- */
-Encapsed.TYPE_STRING = 'string';
-
-/**
- * The node is a shell execute string :
- * ```php
- * <?php
- * echo `ls -larth $path`;
- * ```
- * @constant {String} TYPE_SHELL - `shell`
- */
-Encapsed.TYPE_SHELL = 'shell';
-
-/**
- * The node is a shell execute string :
- * ```php
- * <?php
- * echo <<<STR
- *  Hello $world
- * STR
- * ;
- * ```
- * @constant {String} TYPE_HEREDOC - `heredoc`
- */
-Encapsed.TYPE_HEREDOC = 'heredoc';
-
-/**
- * The node contains a list of constref / variables / expr :
- * ```php
- * <?php
- * echo $foo->bar_$baz;
- * ```
- * @constant {String} TYPE_OFFSET - `offset`
- */
-Encapsed.TYPE_OFFSET = 'offset';
-
-
-module.exports = Encapsed;
-
-},{"./literal":47}],28:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Node = require('./node');
-var KIND = 'entry';
-
-/**
- * An array entry - see [Array](#array)
- * @constructor Entry
- * @extends {Node}
- * @property {Node|null} key The entry key/offset
- * @property {Node} value The entry value
- */
-var Entry = Node.extends(function Entry(key, value, location) {
-  Node.apply(this, [KIND, location]);
-  this.key = key;
-  this.value = value;
-});
-
-module.exports = Entry;
-
-},{"./node":54}],29:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Node = require('./node');
-var KIND = 'error';
-
-
-/**
- * Defines an error node (used only on silentMode)
- * @constructor Error
- * @extends {Node}
- * @property {string} message
- * @property {number} line
- * @property {number|string} token
- * @property {string|array} expected
- */
-var Error = Node.extends(function Error(message, token, line, expected, location) {
-  Node.apply(this, [KIND, location]);
-  this.message = message;
-  this.token = token;
-  this.line = line;
-  this.expected = expected;
-});
-
-module.exports = Error;
-
-},{"./node":54}],30:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Statement = require('./statement');
-var KIND = 'eval';
-
-/**
- * Defines an eval statement
- * @constructor Eval
- * @extends {Statement}
- * @property {Node} source
- */
-var Eval = Statement.extends(function Eval(source, location) {
-  Statement.apply(this, [KIND, location]);
-  this.source = source;
-});
-
-module.exports = Eval;
-
-},{"./statement":71}],31:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Statement = require('./statement');
-var KIND = 'exit';
-
-/**
- * Defines an exit / die call
- * @constructor Exit
- * @extends {Statement}
- * @property {Node|null} status
- */
-var Exit = Statement.extends(function Exit(status, location) {
-  Statement.apply(this, [KIND, location]);
-  this.status = status;
-});
-
-module.exports = Exit;
-
-},{"./statement":71}],32:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Node = require('./node');
-var KIND = 'expression';
-
-/**
- * Any expression node. Since the left-hand side of an assignment may
- * be any expression in general, an expression can also be a pattern.
- * @constructor Expression
- * @extends {Node}
- */
-var Expression = Node.extends(function Expression(kind, location) {
-  Node.apply(this, [kind || KIND, location]);
-});
-
-module.exports = Expression;
-
-},{"./node":54}],33:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-
-var Statement = require('./statement');
-var KIND = 'for';
-
-/**
- * Defines a for iterator
- * @constructor For
- * @extends {Statement}
- * @property {Expression[]} init
- * @property {Expression[]} test
- * @property {Expression[]} increment
- * @property {Statement} body
- * @property {boolean} shortForm
- * @see http://php.net/manual/en/control-structures.for.php
- */
-var For = Statement.extends(function For(init, test, increment, body, shortForm, location) {
-  Statement.apply(this, [KIND, location]);
-  this.init = init;
-  this.test = test;
-  this.increment = increment;
-  this.shortForm = shortForm;
-  this.body = body;
-});
-
-module.exports = For;
-
-},{"./statement":71}],34:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-
-var Statement = require('./statement');
-var KIND = 'foreach';
-
-/**
- * Defines a foreach iterator
- * @constructor Foreach
- * @extends {Statement}
- * @property {Expression} source
- * @property {Expression|null} key
- * @property {Expression} value
- * @property {Statement} body
- * @property {boolean} shortForm
- * @see http://php.net/manual/en/control-structures.foreach.php
- */
-var Foreach = Statement.extends(function Foreach(source, key, value, body, shortForm, location) {
-  Statement.apply(this, [KIND, location]);
-  this.source = source;
-  this.key = key;
-  this.value = value;
-  this.shortForm = shortForm;
-  this.body = body;
-});
-
-module.exports = Foreach;
-
-},{"./statement":71}],35:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Declaration = require('./declaration');
-var KIND          = 'function';
-
-/**
- * Defines a classic function
- * @constructor Function
- * @extends {Declaration}
- * @property {Parameter[]} arguments
- * @property {Identifier} type
- * @property {boolean} byref
- * @property {boolean} nullable
- * @property {Block|null} body
- */
-var fn = Declaration.extends(function _Function(name, args, byref, type, nullable, location) {
-  Declaration.apply(this, [KIND, name, location]);
-  this.arguments = args;
-  this.byref = byref;
-  this.type = type;
-  this.nullable = nullable;
-  this.body = null;
-});
-module.exports = fn;
-
-},{"./declaration":21}],36:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-var Statement = require('./statement');
-var KIND = 'global';
-
-/**
- * Imports a variable from the global scope
- * @constructor Global
- * @extends {Statement}
- * @property {Variable[]} items
- */
-var Global = Statement.extends(function Global(items, location) {
-  Statement.apply(this, [KIND, location]);
-  this.items = items;
-});
-
-module.exports = Global;
-
-},{"./statement":71}],37:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-
-var Statement = require('./statement');
-var KIND = 'goto';
-
-/**
- * Defines goto statement
- * @constructor Goto
- * @extends {Statement}
- * @property {String} label
- * @see {Label}
- */
-var Goto = Statement.extends(function Goto(label, location) {
-  Statement.apply(this, [KIND, location]);
-  this.label = label;
-});
-
-module.exports = Goto;
-
-},{"./statement":71}],38:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-
-var Statement = require('./statement');
-var KIND = 'halt';
-
-/**
- * Halts the compiler execution
- * @constructor Halt
- * @extends {Statement}
- * @property {String} after - String after the halt statement
- * @see http://php.net/manual/en/function.halt-compiler.php
- */
-var Halt = Statement.extends(function Halt(after, location) {
-  Statement.apply(this, [KIND, location]);
-  this.after = after;
-});
-
-module.exports = Halt;
-
-},{"./statement":71}],39:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Node = require('./node');
-var KIND = 'identifier';
-
-/**
- * Defines an identifier node
- * @constructor Identifier
- * @extends {Node}
- * @property {string} name
- * @property {string} resolution
- */
-var Identifier = Node.extends(function Identifier(name, isRelative, location) {
-  Node.apply(this, [KIND, location]);
-  if (isRelative) {
-    this.resolution = Identifier.RELATIVE_NAME;
-  } else if (name.length === 1) {
-    this.resolution = Identifier.UNQUALIFIED_NAME;
-  } else if (name[0] === '') {
-    this.resolution = Identifier.FULL_QUALIFIED_NAME;
-  } else {
-    this.resolution = Identifier.QUALIFIED_NAME;
-  }
-  this.name = name.join('\\');
-});
-
-/**
- * This is an identifier without a namespace separator, such as Foo
- * @constant {String} UNQUALIFIED_NAME
- */
-Identifier.UNQUALIFIED_NAME = 'uqn';
-/**
- * This is an identifier with a namespace separator, such as Foo\Bar
- * @constant {String} QUALIFIED_NAME
- */
-Identifier.QUALIFIED_NAME = 'qn';
-/**
- * This is an identifier with a namespace separator that begins with
- * a namespace separator, such as \Foo\Bar. The namespace \Foo is also
- * a fully qualified name.
- * @constant {String} FULL_QUALIFIED_NAME
- */
-Identifier.FULL_QUALIFIED_NAME = 'fqn';
-/**
- * This is an identifier starting with namespace, such as namespace\Foo\Bar.
- * @constant {String} RELATIVE_NAME
- */
-Identifier.RELATIVE_NAME = 'rn';
-
-
-module.exports = Identifier;
-
-},{"./node":54}],40:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-
-var Statement = require('./statement');
-var KIND = 'if';
-
-/**
- * Defines a if statement
- * @constructor If
- * @extends {Statement}
- * @property {Expression} test
- * @property {Block} body
- * @property {Block|If|null} alternate
- * @property {boolean} shortForm
- */
-var If = Statement.extends(function If(test, body, alternate, shortForm, location) {
-  Statement.apply(this, [KIND, location]);
-  this.test = test;
-  this.body = body;
-  this.alternate = alternate;
-  this.shortForm = shortForm;
-});
-
-module.exports = If;
-
-},{"./statement":71}],41:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Statement = require('./statement');
-var KIND = 'include';
-
-/**
- * Defines system include call
- * @constructor Include
- * @extends {Statement}
- * @property {Node} target
- * @property {boolean} once
- * @property {boolean} require
- */
-var Include = Statement.extends(function Include(once, require, target, location) {
-  Statement.apply(this, [KIND, location]);
-  this.once = once;
-  this.require = require;
-  this.target = target;
-});
-
-module.exports = Include;
-
-},{"./statement":71}],42:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Literal = require('./literal');
-var KIND = 'inline';
-
-/**
- * Defines inline html output (treated as echo output)
- * @constructor Inline
- * @extends {Literal}
- */
-var Inline = Literal.extends(function Inline(value, location) {
-  Literal.apply(this, [KIND, value, location]);
-});
-
-module.exports = Inline;
-
-},{"./literal":47}],43:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Declaration = require('./declaration');
-var KIND = 'interface';
-
-
-/**
- * An interface definition
- * @constructor Interface
- * @extends {Declaration}
- * @property {Identifier[]} extends
- * @property {Declaration[]} body
- */
-var Interface = Declaration.extends(function Interface(name, ext, body, location) {
-  Declaration.apply(this, [KIND, name, location]);
-  this.extends = ext;
-  this.body = body;
-});
-
-module.exports = Interface;
-
-},{"./declaration":21}],44:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Sys = require('./sys');
-var KIND = 'isset';
-
-/**
- * Defines an isset call
- * @constructor Isset
- * @extends {Sys}
- */
-var Isset = Sys.extends(function Isset(args, location) {
-  Sys.apply(this, [KIND, args, location]);
-});
-
-module.exports = Isset;
-
-},{"./sys":76}],45:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-var Node = require('./node');
-var KIND = 'label';
-
-/**
- * A label statement (referenced by goto)
- * @constructor Label
- * @extends {Node}
- * @property {String} name
- */
-var Label = Node.extends(function Label(name, location) {
-  Node.apply(this, [KIND, location]);
-  this.name = name;
-});
-
-module.exports = Label;
-
-},{"./node":54}],46:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Sys = require('./sys');
-var KIND = 'list';
-
-/**
- * Defines list assignment
- * @constructor List
- * @extends {Sys}
- */
-var List = Sys.extends(function List(args, location) {
-  Sys.apply(this, [KIND, args, location]);
-});
-
-module.exports = List;
-
-},{"./sys":76}],47:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Expr = require('./expression');
-var KIND = 'literal';
-
-/**
- * Defines an array structure
- * @constructor Literal
- * @extends {Expression}
- * @property {Node|string|number|boolean|null} value
- */
-var Literal = Expr.extends(function Literal(kind, value, location) {
-  Expr.apply(this, [kind || KIND, location]);
-  this.value = value;
-});
-
-module.exports = Literal;
-
-},{"./expression":32}],48:[function(require,module,exports){
+},{"./ast/location":4,"./ast/position":5}],4:[function(require,module,exports){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
  * @authors https://github.com/glayzzle/php-parser/graphs/contributors
@@ -1880,308 +612,7 @@ var Location = function(source, start, end) {
 
 module.exports = Location;
 
-},{}],49:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Expr = require('./expression');
-var KIND = 'lookup';
-
-/**
- * Lookup on an offset in the specified object
- * @constructor Lookup
- * @extends {Expression}
- * @property {Expression} what
- * @property {Expression} offset
- */
-var Lookup = Expr.extends(function Lookup(kind, what, offset, location) {
-  Expr.apply(this, [kind || KIND, location]);
-  this.what = what;
-  this.offset = offset;
-});
-
-module.exports = Lookup;
-
-},{"./expression":32}],50:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Literal = require('./literal');
-var KIND = 'magic';
-
-/**
- * Defines magic constant
- * @constructor Magic
- * @extends {Literal}
- */
-var Magic = Literal.extends(function Magic(value, location) {
-  Literal.apply(this, [KIND, value, location]);
-});
-
-module.exports = Magic;
-
-},{"./literal":47}],51:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var fn = require('./function');
-var KIND = 'method';
-
-/**
- * Defines a class/interface/trait method
- * @constructor Method
- * @extends {Function}
- * @property {boolean} isAbstract
- * @property {boolean} isFinal
- * @property {boolean} isStatic
- * @property {string} visibility
- */
-var Method = fn.extends(function Method() {
-  fn.apply(this, arguments);
-  this.kind = KIND;
-});
-
-module.exports = Method;
-
-},{"./function":35}],52:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Block = require('./block');
-var Identifier = require('./identifier');
-var KIND = 'namespace';
-
-/**
- * The main program node
- * @constructor Namespace
- * @extends {Block}
- * @property {String} name
- * @property {Boolean} withBrackets
- */
-var Namespace = Block.extends(function Namespace(name, children, withBrackets, location) {
-  Block.apply(this, [KIND, children, location]);
-  this.name = name;
-  this.withBrackets = withBrackets || false;
-});
-
-module.exports = Namespace;
-
-},{"./block":7,"./identifier":39}],53:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-
-var Statement = require('./statement');
-var KIND = 'new';
-
-/**
- * Creates a new instance of the specified class
- * @constructor New
- * @extends {Statement}
- * @property {Identifier|Variable|Class} what
- * @property {Arguments[]} arguments
- */
-var New = Statement.extends(function New(what, args, location) {
-  Statement.apply(this, [KIND, location]);
-  this.what = what;
-  this.arguments = args;
-});
-
-module.exports = New;
-
-},{"./statement":71}],54:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-/**
- * A generic AST node
- * @constructor Node
- * @property {Location|null} loc
- * @property {String} kind
- */
-var Node = function Node(kind, location) {
-  this.kind = kind;
-  if(location) {
-    this.loc = location;
-  }
-};
-
-/**
- * Helper for extending the Node class
- * @param {Function} constructor
- * @return {Function}
- */
-Node.extends = function(constructor) {
-  constructor.prototype = Object.create(this.prototype);
-  constructor.extends = this.extends;
-  constructor.prototype.constructor = constructor;
-  return constructor;
-};
-
-module.exports = Node;
-
-},{}],55:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Literal = require('./literal');
-var KIND = 'nowdoc';
-
-/**
- * Defines a nowdoc string
- * @constructor String
- * @extends {Literal}
- * @property {String} label
-
- */
-var Nowdoc = Literal.extends(function Nowdoc(value, label, location) {
-  Literal.apply(this, [KIND, value, location]);
-  this.label = label;
-});
-
-module.exports = Nowdoc;
-
-},{"./literal":47}],56:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Literal = require('./literal');
-var KIND = 'number';
-
-/**
- * Defines a numeric value
- * @constructor Number
- * @extends {Literal}
- */
-var _Number = Literal.extends(function Number(value, location) {
-  Literal.apply(this, [KIND, value, location]);
-});
-
-module.exports = _Number;
-
-},{"./literal":47}],57:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-var Lookup = require('./lookup');
-var KIND = 'offsetlookup';
-
-/**
- * Lookup on an offset in an array
- * @constructor OffsetLookup
- * @extends {Lookup}
- */
-var OffsetLookup = Lookup.extends(function OffsetLookup(what, offset, location) {
-  Lookup.apply(this, [KIND, what, offset, location]);
-});
-
-module.exports = OffsetLookup;
-
-},{"./lookup":49}],58:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-
-var Expr = require('./expression');
-var KIND = 'operation';
-
-/**
- * Defines binary operations
- * @constructor Operation
- * @extends {Expression}
- */
-var Operation = Expr.extends(function Operation(kind, location) {
-  Expr.apply(this, [kind || KIND, location]);
-});
-
-module.exports = Operation;
-
-},{"./expression":32}],59:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Declaration = require('./declaration');
-var KIND = 'parameter';
-
-/**
- * Defines a function parameter
- * @constructor Parameter
- * @extends {Declaration}
- * @property {Identifier|null} type
- * @property {Node|null} value
- * @property {boolean} byref
- * @property {boolean} variadic
- * @property {boolean} nullable
- */
-var Parameter = Declaration.extends(function Parameter(name, type, value, isRef, isVariadic, nullable, location) {
-  Declaration.apply(this, [KIND, name, location]);
-  this.value = value;
-  this.type = type;
-  this.byref = isRef;
-  this.variadic = isVariadic;
-  this.nullable = nullable;
-});
-
-module.exports = Parameter;
-
-},{"./declaration":21}],60:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-
-var Operation = require('./operation');
-var KIND = 'parenthesis';
-
-/**
- * Parenthesis encapsulation `(... expr ...)`
- * @constructor Parenthesis
- * @extends {Operation}
- * @property {Expression} inner
- */
-var Parenthesis = Operation.extends(function Parenthesis(inner, location) {
-  Operation.apply(this, [KIND, location]);
-  this.inner = inner;
-});
-
-module.exports = Parenthesis;
-
-},{"./operation":58}],61:[function(require,module,exports){
+},{}],5:[function(require,module,exports){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
  * @authors https://github.com/glayzzle/php-parser/graphs/contributors
@@ -2203,801 +634,7 @@ var Position = function(line, column, offset) {
 
 module.exports = Position;
 
-},{}],62:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-
-var Operation = require('./operation');
-var KIND = 'post';
-
-/**
- * Defines a post operation `$i++` or `$i--`
- * @constructor Post
- * @extends {Operation}
- * @property {String} type
- * @property {Variable} what
- */
-var Post = Operation.extends(function Post(type, what, location) {
-  Operation.apply(this, [KIND, location]);
-  this.type = type;
-  this.what = what;
-});
-
-module.exports = Post;
-
-},{"./operation":58}],63:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-
-var Operation = require('./operation');
-var KIND = 'pre';
-
-/**
- * Defines a pre operation `++$i` or `--$i`
- * @constructor Pre
- * @extends {Operation}
- * @property {String} type
- * @property {Variable} what
- */
-var Pre = Operation.extends(function Pre(type, what, location) {
-  Operation.apply(this, [KIND, location]);
-  this.type = type;
-  this.what = what;
-});
-
-module.exports = Pre;
-
-},{"./operation":58}],64:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Sys = require('./sys');
-var KIND = 'print';
-
-/**
- * Outputs
- * @constructor Print
- * @extends {Sys}
- */
-var Print = Sys.extends(function Print(args, location) {
-  Sys.apply(this, [KIND, args, location]);
-});
-
-module.exports = Print;
-
-},{"./sys":76}],65:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Block = require('./block');
-var KIND = 'program';
-
-/**
- * The main program node
- * @constructor Program
- * @extends {Block}
- * @property {Error[]} errors
- */
-var Program = Block.extends(function Program(children, errors, location) {
-  Block.apply(this, [KIND, children, location]);
-  this.errors = errors;
-});
-
-module.exports = Program;
-
-},{"./block":7}],66:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Declaration = require('./declaration');
-var KIND = 'property';
-
-/**
- * Defines a class property
- * @constructor Property
- * @extends {Declaration}
- * @property {boolean} isFinal
- * @property {boolean} isStatic
- * @property {string} visibility
- * @property {Node|null} value
- */
-var Property = Declaration.extends(function Property(name, value, flags, location) {
-  Declaration.apply(this, [KIND, name, location]);
-  this.value = value;
-  this.parseFlags(flags);
-});
-
-module.exports = Property;
-
-},{"./declaration":21}],67:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-var Lookup = require('./lookup');
-var KIND = 'propertylookup';
-
-/**
- * Lookup to an object property
- * @constructor PropertyLookup
- * @extends {Lookup}
- */
-var PropertyLookup = Lookup.extends(function PropertyLookup(what, offset, location) {
-  Lookup.apply(this, [KIND, what, offset, location]);
-});
-
-module.exports = PropertyLookup;
-
-},{"./lookup":49}],68:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-
-var Statement = require('./statement');
-var KIND = 'retif';
-
-/**
- * Defines a short if statement that returns a value
- * @constructor RetIf
- * @extends {Statement}
- * @property {Expression} test
- * @property {Expression} trueExpr
- * @property {Expression} falseExpr
- */
-var RetIf = Statement.extends(function RetIf(test, trueExpr, falseExpr, location) {
-  Statement.apply(this, [KIND, location]);
-  this.test = test;
-  this.trueExpr = trueExpr;
-  this.falseExpr = falseExpr;
-});
-
-module.exports = RetIf;
-
-},{"./statement":71}],69:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-var Node = require('./node');
-var KIND = 'return';
-
-/**
- * A continue statement
- * @constructor Return
- * @extends {Node}
- * @property {Expression|null} expr
- */
-var Return = Node.extends(function Return(expr, location) {
-  Node.apply(this, [KIND, location]);
-  this.expr = expr;
-});
-
-module.exports = Return;
-
-},{"./node":54}],70:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-
-var Statement = require('./statement');
-var KIND = 'silent';
-
-/**
- * Avoids to show/log warnings & notices from the inner expression
- * @constructor Silent
- * @extends {Statement}
- * @property {Expression} expr
- */
-var Silent = Statement.extends(function Silent(expr, location) {
-  Statement.apply(this, [KIND, location]);
-  this.expr = expr;
-});
-
-module.exports = Silent;
-
-},{"./statement":71}],71:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Node = require('./node');
-var KIND = 'statement';
-
-/**
- * Any statement.
- * @constructor Statement
- * @extends {Node}
- */
-var Statement = Node.extends(function Statement(kind, location) {
-  Node.apply(this, [kind || KIND, location]);
-});
-
-module.exports = Statement;
-
-},{"./node":54}],72:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-var Statement = require('./statement');
-var KIND = 'static';
-
-/**
- * Declares a static variable into the current scope
- * @constructor Static
- * @extends {Statement}
- * @property {Variable[]|Assign[]} items
- */
-var Static = Statement.extends(function Static(items, location) {
-  Statement.apply(this, [KIND, location]);
-  this.items = items;
-});
-
-module.exports = Static;
-
-},{"./statement":71}],73:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-var Lookup = require('./lookup');
-var KIND = 'staticlookup';
-
-/**
- * Lookup to a static property
- * @constructor StaticLookup
- * @extends {Lookup}
- */
-var StaticLookup = Lookup.extends(function StaticLookup(what, offset, location) {
-  Lookup.apply(this, [KIND, what, offset, location]);
-});
-
-module.exports = StaticLookup;
-
-},{"./lookup":49}],74:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Literal = require('./literal');
-var KIND = 'string';
-
-/**
- * Defines a string (simple ou double quoted) - chars are already escaped
- * @constructor String
- * @extends {Literal}
- * @property {boolean} isDoubleQuote
- * @see {Encapsed}
- */
-var String = Literal.extends(function String(isDoubleQuote, value, location) {
-  Literal.apply(this, [KIND, value, location]);
-  this.isDoubleQuote = isDoubleQuote;
-});
-
-module.exports = String;
-
-},{"./literal":47}],75:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-
-var Statement = require('./statement');
-var KIND = 'switch';
-
-/**
- * Defines a switch statement
- * @constructor Switch
- * @extends {Statement}
- * @property {Expression} test
- * @property {Block} body
- * @property {boolean} shortForm
- */
-var Switch = Statement.extends(function Switch(test, body, shortForm, location) {
-  Statement.apply(this, [KIND, location]);
-  this.test = test;
-  this.body = body;
-  this.shortForm = shortForm;
-});
-
-module.exports = Switch;
-
-},{"./statement":71}],76:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Statement = require('./statement');
-var KIND = 'sys';
-
-/**
- * Defines system based call
- * @constructor Sys
- * @extends {Statement}
- * @property {Node[]} arguments
- */
-var Sys = Statement.extends(function Sys(kind, args, location) {
-  Statement.apply(this, [kind || KIND, location]);
-  this.arguments = args;
-});
-
-module.exports = Sys;
-
-},{"./statement":71}],77:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-
-var Statement = require('./statement');
-var KIND = 'throw';
-
-/**
- * Defines a throw statement
- * @constructor Throw
- * @extends {Statement}
- * @property {Expression} what
- */
-var Throw = Statement.extends(function Throw(what, location) {
-  Statement.apply(this, [KIND, location]);
-  this.what = what;
-});
-
-module.exports = Throw;
-
-},{"./statement":71}],78:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Declaration = require('./declaration');
-var KIND = 'trait';
-
-
-/**
- * A trait definition
- * @constructor Trait
- * @extends {Declaration}
- * @property {Identifier|null} extends
- * @property {Identifier[]} implements
- * @property {Declaration[]} body
- */
-var Trait = Declaration.extends(function Trait(name, ext, impl, body, location) {
-  Declaration.apply(this, [KIND, name, location]);
-  this.extends = ext;
-  this.implements = impl;
-  this.body = body;
-});
-
-module.exports = Trait;
-
-},{"./declaration":21}],79:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Node = require('./node');
-var KIND = 'traitalias';
-
-var IS_PUBLIC     = 'public';
-var IS_PROTECTED  = 'protected';
-var IS_PRIVATE    = 'private';
-
-/**
- * Defines a trait alias
- * @constructor TraitAlias
- * @extends {Node}
- * @property {Identifier|null} trait
- * @property {string} method
- * @property {string|null} as
- * @property {string|null} visibility
- */
-var TraitAlias = Node.extends(function TraitAlias(trait, method, as, flags, location) {
-  Node.apply(this, [KIND, location]);
-  this.trait = trait;
-  this.method = method;
-  this.as = as;
-  if (flags) {
-    if (flags[0] === 0) {
-      this.visibility = IS_PUBLIC;
-    } else if (flags[0] === 1) {
-      this.visibility = IS_PROTECTED;
-    } else {
-      this.visibility = IS_PRIVATE;
-    }
-  } else {
-    this.visibility = null;
-  }
-});
-
-module.exports = TraitAlias;
-
-},{"./node":54}],80:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Node = require('./node');
-var KIND = 'traitprecedence';
-
-/**
- * Defines a trait alias
- * @constructor TraitPrecedence
- * @extends {Node}
- * @property {Identifier|null} trait
- * @property {string} method
- * @property {Identifier[]} instead
- */
-var TraitPrecedence = Node.extends(function TraitPrecedence(trait, method, instead, location) {
-  Node.apply(this, [KIND, location]);
-  this.trait = trait;
-  this.method = method;
-  this.instead = instead;
-});
-
-module.exports = TraitPrecedence;
-
-},{"./node":54}],81:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Node = require('./node');
-var KIND = 'traituse';
-
-/**
- * Defines a trait usage
- * @constructor TraitUse
- * @extends {Node}
- * @property {Identifier[]} traits
- * @property {Node[]|null} adaptations
- */
-var TraitUse = Node.extends(function TraitUse(traits, adaptations, location) {
-  Node.apply(this, [KIND, location]);
-  this.traits = traits;
-  this.adaptations = adaptations;
-});
-
-module.exports = TraitUse;
-
-},{"./node":54}],82:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-
-var Statement = require('./statement');
-var KIND = 'try';
-
-/**
- * Defines a try statement
- * @constructor Try
- * @extends {Statement}
- * @property {Block} body
- * @property {Catch[]} catches
- * @property {Block} allways
- */
-var Try = Statement.extends(function Try(body, catches, always, location) {
-  Statement.apply(this, [KIND, location]);
-  this.body = body;
-  this.catches = catches;
-  this.always = always;
-});
-
-module.exports = Try;
-
-},{"./statement":71}],83:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-
-var Operation = require('./operation');
-var KIND = 'unary';
-
-/**
- * Unary operations
- * @constructor Unary
- * @extends {Operation}
- * @property {String} type
- * @property {Expression} what
- */
-var Unary = Operation.extends(function Unary(type, what, location) {
-  Operation.apply(this, [KIND, location]);
-  this.type = type;
-  this.what = what;
-});
-
-module.exports = Unary;
-
-},{"./operation":58}],84:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-
-var Sys = require('./sys');
-var KIND = 'unset';
-
-/**
- * Deletes references to a list of variables
- * @constructor Unset
- * @extends {Sys}
- */
-var Unset = Sys.extends(function Unset(args, location) {
-  Sys.apply(this, [KIND, args, location]);
-});
-
-module.exports = Unset;
-
-},{"./sys":76}],85:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-var Statement = require('./statement');
-var KIND = 'usegroup';
-
-/**
- * Defines a use statement (with a list of use items)
- * @constructor UseGroup
- * @extends {Statement}
- * @property {String|null} name
- * @property {String|null} type - Possible value : function, const
- * @property {UseItem[]} item
- * @see {Namespace}
- * @see http://php.net/manual/en/language.namespaces.importing.php
- */
-var UseGroup = Statement.extends(function UseGroup(name, type, items, location) {
-  Statement.apply(this, [KIND, location]);
-  this.name = name;
-  this.type = type;
-  this.items = items;
-});
-
-module.exports = UseGroup;
-
-},{"./statement":71}],86:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-var Statement = require('./statement');
-var KIND = 'useitem';
-
-/**
- * Defines a use statement (from namespace)
- * @constructor UseItem
- * @extends {Statement}
- * @property {String} name
- * @property {String|null} type - Possible value : function, const
- * @property {String|null} alias
- * @see {Namespace}
- * @see http://php.net/manual/en/language.namespaces.importing.php
- */
-var UseItem = Statement.extends(function UseItem(name, alias, type, location) {
-  Statement.apply(this, [KIND, location]);
-  this.name = name;
-  this.alias = alias;
-  this.type = type;
-});
-
-
-/**
- * Importing a constant
- * @constant {String} TYPE_CONST
- */
-UseItem.TYPE_CONST = 'const';
-/**
- * Importing a function
- * @constant {String} TYPE_FUNC
- */
-UseItem.TYPE_FUNCTION = 'function';
-
-
-module.exports = UseItem;
-
-},{"./statement":71}],87:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-var Expr = require('./expression');
-var KIND = 'variable';
-
-/**
- * Any expression node. Since the left-hand side of an assignment may
- * be any expression in general, an expression can also be a pattern.
- * @constructor Variable
- * @extends {Expression}
- * @example
- * // PHP code :
- * &$foo
- * // AST output
- * {
- *  "kind": "variable",
- *  "name": "foo",
- *  "byref": true,
- *  "curly": false
- * }
- * @property {String|Node} name The variable name (can be a complex expression when the name is resolved dynamically)
- * @property {boolean} byref Indicate if the variable reference is used, ex `&$foo`
- * @property {boolean} curly Indicate if the name is defined between curlies, ex `${foo}`
- */
-var Variable = Expr.extends(function Variable(name, byref, curly, location) {
-  Expr.apply(this, [KIND, location]);
-  this.name = name;
-  this.byref = byref || false;
-  this.curly = curly || false;
-});
-
-module.exports = Variable;
-
-},{"./expression":32}],88:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-var Expr = require('./expression');
-var KIND = 'variadic';
-
-/**
- * Introduce a list of items into the arguments of the call
- * @constructor Variadic
- * @extends {Expression}
- * @property {Array|Expression} what
- * @see https://wiki.php.net/rfc/argument_unpacking
- */
-var Variadic = Expr.extends(function Variadic(what, location) {
-  Expr.apply(this, [KIND, location]);
-  this.what = what;
-});
-
-module.exports = Variadic;
-
-},{"./expression":32}],89:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-
-var Statement = require('./statement');
-var KIND = 'while';
-
-/**
- * Defines a while statement
- * @constructor While
- * @extends {Statement}
- * @property {Expression} test
- * @property {Statement} body
- * @property {boolean} shortForm
- */
-var While = Statement.extends(function While(test, body, shortForm, location) {
-  Statement.apply(this, [KIND, location]);
-  this.test = test;
-  this.body = body;
-  this.shortForm = shortForm;
-});
-
-module.exports = While;
-
-},{"./statement":71}],90:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-
-var Expression = require('./expression');
-var KIND = 'yield';
-
-/**
- * Defines a yield generator statement
- * @constructor Yield
- * @extends {Expression}
- * @property {Expression|Null} value
- * @property {Expression|Null} key
- * @see http://php.net/manual/en/language.generators.syntax.php
- */
-var Yield = Expression.extends(function Yield(value, key, location) {
-  Expression.apply(this, [KIND, location]);
-  this.value = value;
-  this.key = key;
-});
-
-module.exports = Yield;
-
-},{"./expression":32}],91:[function(require,module,exports){
-/*!
- * Copyright (C) 2017 Glayzzle (BSD3 License)
- * @authors https://github.com/glayzzle/php-parser/graphs/contributors
- * @url http://glayzzle.com
- */
-"use strict";
-
-var Expression = require('./expression');
-var KIND = 'yieldfrom';
-
-/**
- * Defines a yield from generator statement
- * @constructor YieldFrom
- * @extends {Expression}
- * @property {Expression} value
- * @see http://php.net/manual/en/language.generators.syntax.php
- */
-var YieldFrom = Expression.extends(function YieldFrom(value, location) {
-  Expression.apply(this, [KIND, location]);
-  this.value = value;
-});
-
-module.exports = YieldFrom;
-
-},{"./expression":32}],92:[function(require,module,exports){
+},{}],6:[function(require,module,exports){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
  * @authors https://github.com/glayzzle/php-parser/graphs/contributors
@@ -3443,7 +1080,7 @@ lexer.prototype.next = function () {
 
 module.exports = lexer;
 
-},{"./lexer/comments.js":93,"./lexer/initial.js":94,"./lexer/numbers.js":95,"./lexer/property.js":96,"./lexer/scripting.js":97,"./lexer/strings.js":98,"./lexer/tokens.js":99,"./lexer/utils.js":100}],93:[function(require,module,exports){
+},{"./lexer/comments.js":7,"./lexer/initial.js":8,"./lexer/numbers.js":9,"./lexer/property.js":10,"./lexer/scripting.js":11,"./lexer/strings.js":12,"./lexer/tokens.js":13,"./lexer/utils.js":14}],7:[function(require,module,exports){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
  * @authors https://github.com/glayzzle/php-parser/graphs/contributors
@@ -3500,7 +1137,7 @@ module.exports = {
   }
 };
 
-},{}],94:[function(require,module,exports){
+},{}],8:[function(require,module,exports){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
  * @authors https://github.com/glayzzle/php-parser/graphs/contributors
@@ -3560,7 +1197,7 @@ module.exports = {
   }
 };
 
-},{}],95:[function(require,module,exports){
+},{}],9:[function(require,module,exports){
 (function (process){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
@@ -3689,7 +1326,7 @@ module.exports = {
 };
 
 }).call(this,require('_process'))
-},{"_process":2}],96:[function(require,module,exports){
+},{"_process":2}],10:[function(require,module,exports){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
  * @authors https://github.com/glayzzle/php-parser/graphs/contributors
@@ -3769,7 +1406,7 @@ module.exports = {
   }
 };
 
-},{}],97:[function(require,module,exports){
+},{}],11:[function(require,module,exports){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
  * @authors https://github.com/glayzzle/php-parser/graphs/contributors
@@ -3871,7 +1508,7 @@ module.exports = {
   }
 };
 
-},{}],98:[function(require,module,exports){
+},{}],12:[function(require,module,exports){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
  * @authors https://github.com/glayzzle/php-parser/graphs/contributors
@@ -4287,7 +1924,7 @@ module.exports = {
   }
 };
 
-},{}],99:[function(require,module,exports){
+},{}],13:[function(require,module,exports){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
  * @authors https://github.com/glayzzle/php-parser/graphs/contributors
@@ -4558,7 +2195,7 @@ module.exports = {
   }
 };
 
-},{}],100:[function(require,module,exports){
+},{}],14:[function(require,module,exports){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
  * @authors https://github.com/glayzzle/php-parser/graphs/contributors
@@ -4641,7 +2278,7 @@ module.exports = {
   }
 };
 
-},{}],101:[function(require,module,exports){
+},{}],15:[function(require,module,exports){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
  * @authors https://github.com/glayzzle/php-parser/graphs/contributors
@@ -5111,7 +2748,7 @@ parser.prototype.is = function(type) {
 
 module.exports = parser;
 
-},{"./parser/array.js":102,"./parser/class.js":103,"./parser/comment.js":104,"./parser/expr.js":105,"./parser/function.js":106,"./parser/if.js":107,"./parser/loops.js":108,"./parser/main.js":109,"./parser/namespace.js":110,"./parser/scalar.js":111,"./parser/statement.js":112,"./parser/switch.js":113,"./parser/try.js":114,"./parser/utils.js":115,"./parser/variable.js":116}],102:[function(require,module,exports){
+},{"./parser/array.js":16,"./parser/class.js":17,"./parser/comment.js":18,"./parser/expr.js":19,"./parser/function.js":20,"./parser/if.js":21,"./parser/loops.js":22,"./parser/main.js":23,"./parser/namespace.js":24,"./parser/scalar.js":25,"./parser/statement.js":26,"./parser/switch.js":27,"./parser/try.js":28,"./parser/utils.js":29,"./parser/variable.js":30}],16:[function(require,module,exports){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
  * @authors https://github.com/glayzzle/php-parser/graphs/contributors
@@ -5202,7 +2839,7 @@ module.exports = {
   }
 };
 
-},{}],103:[function(require,module,exports){
+},{}],17:[function(require,module,exports){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
  * @authors https://github.com/glayzzle/php-parser/graphs/contributors
@@ -5664,7 +3301,7 @@ module.exports = {
   }
 };
 
-},{}],104:[function(require,module,exports){
+},{}],18:[function(require,module,exports){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
  * @authors https://github.com/glayzzle/php-parser/graphs/contributors
@@ -5711,7 +3348,7 @@ module.exports = {
   }
 };
 
-},{}],105:[function(require,module,exports){
+},{}],19:[function(require,module,exports){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
  * @authors https://github.com/glayzzle/php-parser/graphs/contributors
@@ -6269,7 +3906,7 @@ module.exports = {
   }
 };
 
-},{}],106:[function(require,module,exports){
+},{}],20:[function(require,module,exports){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
  * @authors https://github.com/glayzzle/php-parser/graphs/contributors
@@ -6519,7 +4156,7 @@ module.exports = {
   }
 };
 
-},{}],107:[function(require,module,exports){
+},{}],21:[function(require,module,exports){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
  * @authors https://github.com/glayzzle/php-parser/graphs/contributors
@@ -6621,7 +4258,7 @@ module.exports = {
   }
 };
 
-},{}],108:[function(require,module,exports){
+},{}],22:[function(require,module,exports){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
  * @authors https://github.com/glayzzle/php-parser/graphs/contributors
@@ -6781,7 +4418,7 @@ module.exports = {
   }
 };
 
-},{}],109:[function(require,module,exports){
+},{}],23:[function(require,module,exports){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
  * @authors https://github.com/glayzzle/php-parser/graphs/contributors
@@ -6803,7 +4440,7 @@ module.exports = {
   }
 };
 
-},{}],110:[function(require,module,exports){
+},{}],24:[function(require,module,exports){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
  * @authors https://github.com/glayzzle/php-parser/graphs/contributors
@@ -6977,7 +4614,7 @@ module.exports = {
   }
 };
 
-},{}],111:[function(require,module,exports){
+},{}],25:[function(require,module,exports){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
  * @authors https://github.com/glayzzle/php-parser/graphs/contributors
@@ -7247,7 +4884,7 @@ module.exports = {
   }
 };
 
-},{}],112:[function(require,module,exports){
+},{}],26:[function(require,module,exports){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
  * @authors https://github.com/glayzzle/php-parser/graphs/contributors
@@ -7616,7 +5253,7 @@ module.exports = {
   }
 };
 
-},{}],113:[function(require,module,exports){
+},{}],27:[function(require,module,exports){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
  * @authors https://github.com/glayzzle/php-parser/graphs/contributors
@@ -7712,7 +5349,7 @@ module.exports = {
   }
 };
 
-},{}],114:[function(require,module,exports){
+},{}],28:[function(require,module,exports){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
  * @authors https://github.com/glayzzle/php-parser/graphs/contributors
@@ -7758,7 +5395,7 @@ module.exports = {
   }
 };
 
-},{}],115:[function(require,module,exports){
+},{}],29:[function(require,module,exports){
 /*!
  * Defines a list of helper functions for parsing
  * Copyright (C) 2017 Glayzzle (BSD3 License)
@@ -7880,7 +5517,7 @@ module.exports = {
 
 };
 
-},{}],116:[function(require,module,exports){
+},{}],30:[function(require,module,exports){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
  * @authors https://github.com/glayzzle/php-parser/graphs/contributors
@@ -8212,7 +5849,7 @@ module.exports = {
   }
 };
 
-},{}],117:[function(require,module,exports){
+},{}],31:[function(require,module,exports){
 /*!
  * Copyright (C) 2017 Glayzzle (BSD3 License)
  * @authors https://github.com/glayzzle/php-parser/graphs/contributors
@@ -8704,4 +6341,4 @@ engine.prototype.tokenGetAll = function(buffer) {
 module.exports = engine;
 
 }).call(this,{"isBuffer":require("../node_modules/is-buffer/index.js")})
-},{"../node_modules/is-buffer/index.js":1,"./ast":3,"./lexer":92,"./parser":101,"./tokens":117}]},{},[]);
+},{"../node_modules/is-buffer/index.js":1,"./ast":3,"./lexer":6,"./parser":15,"./tokens":31}]},{},[]);
