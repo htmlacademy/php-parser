@@ -1,5 +1,5 @@
 {
-  "name": "php-parser",
+  "name": "@htmlacademy/php-parser",
   "version": "2.2.0",
   "description": "Parse PHP code and returns its AST",
   "main": "src/index.js",
@@ -9,7 +9,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/glayzzle/php-parser"
+    "url": "ssh://git@github.com/htmlacademy/php-parser.git"
+  },
+  "publishConfig": {
+    "registry": "https://npm.pkg.github.com/"
   },
   "bugs": {
     "url": "https://github.com/glayzzle/php-parser/issues"
