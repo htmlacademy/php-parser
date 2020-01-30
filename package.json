@@ -1,6 +1,6 @@
 {
   "name": "@htmlacademy/php-parser",
-  "version": "2.2.0",
+  "version": "2.2.1",
   "description": "Parse PHP code and returns its AST",
   "main": "src/index.js",
   "scripts": {
